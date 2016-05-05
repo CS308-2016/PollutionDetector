@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Flot Examples: Real-time updates</title>
+	<link href="../examples.css" rel="stylesheet" type="text/css">
+	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
+	<script type="text/javascript">
+	var data1=[];
+	$(function() {
+
+
+
+		var data = [],
+			totalPoints = 300;
+
+		//function to read the last 300 values of sensor 1 and store it in  an array
+		function getData() {
+			var nums=[];
+			$.ajax({
+				url:'./Server_JavaApp/jServoTcpConroller/data.txt',
+				type:'GET',
+				async: false,
+				success:function(r) {
+					nums1 = r.trim().split('\n');
+					console.log(nums1);
+					var x = nums1.length;
+					for (var i =Math.max(0,x-300),j=0;i<x;i++,j++) {
+						nums.push([j,parseInt(nums1[i])]);
+					}
+				}
+			})
+			data1 = nums;
+			return nums;
+		   }
+		
+		//function to read the last 300 values of sensor 2 and store it in  an array
+		   function getData1() {
+			var nums=[];
+			$.ajax({
+				url:'./Server_JavaApp/jServoTcpConroller_1/data1.txt',
+				type:'GET',
+				async: false,
+				success:function(r) {
+					nums1 = r.trim().split('\n');
+					console.log(nums1);
+					var x = nums1.length;
+					for (var i =Math.max(0,x-300),j=0;i<x;i++,j++) {
+						nums.push([j,parseInt(nums1[i])]);
+					}
+				}
+			})
+			data1 = nums;
+			return nums;
+		   }
+
+
+		// code for plotting the two sensors data from the array we got from getdata functions
+		
+		var updateInterval = 300;
+		
+		var plot = $.plot("#placeholder", [ getData() ], {
+			series: {
+				shadowSize: 0	
+			},
+			yaxis: {
+				min: 300,
+				max: 800
+			},
+			xaxis: {
+				show: false
+			}
+		});
+		var plot1 = $.plot("#placeholder2", [ getData1() ], {
+			series: {
+				shadowSize: 0
+			},
+			yaxis: {
+				min: 300,
+				max: 800
+			},
+			xaxis: {
+				show: false
+			}
+		});
+		
+		//function for updating graph every second
+		function update() {
+
+			plot.setData([getData()]);
+			plot.setupGrid();
+
+			plot.draw();
+			
+			plot1.setData([getData1()]);
+			plot1.setupGrid();
+
+			plot1.draw();
+			setTimeout(update, updateInterval);
+		}
+
+		update();
+
+
+		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
+	});
+
+	</script>
+</head>
+<body>
+
+	<div id="header">
+		<h2>Real-time updates</h2>
+	</div>
+
+	<div id="content">
+		
+		<h2>Graph 1</h2>
+		<div class="demo-container">
+			<div id="placeholder" class="demo-placeholder"></div>
+		</div>
+		
+		<h2>Graph 2</h2>
+		<div class="demo-container">
+			<div id="placeholder2" class="demo-placeholder"></div>
+		</div>
+
+		
+
+	</div>
+
+	
+
+</body>
+</html>
